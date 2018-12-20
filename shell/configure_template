@@ -84,10 +84,10 @@ done`
 	\$(eval package:=\$(basename \$(notdir \$@)))
 	\$(eval class:=\$(basename \$(notdir \$@)))
 	\$(eval testbenchfile:=\$(dir \$<)tb_\$(notdir \$<))
-	\$(SBT) 'run-main \$(package).\$(class) -td \$(VERILOGPATH)' 
+	\$(SBT) 'runMain \$(package).\$(class) -td \$(VERILOGPATH)' 
 	@#Test if testbech generator exists and compile it
 	@if [ -f \$(testbenchfile) ]; then \\
-		\$(SBT) 'run-main \$(package).tb_\$(class) -td \$(VERILOGPATH)'; \\
+		\$(SBT) 'runMain \$(package).tb_\$(class) -td \$(VERILOGPATH)'; \\
 	fi
 clean:
 	rm -f \$(VERILOGPATH)/*.v
