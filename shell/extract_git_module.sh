@@ -105,6 +105,7 @@ fi
 
 if [ -d "${WD}/${MODULE}" ]; then
     echo "Directory ${WD}/${MODULE} exists, remove it first"
+    exit 1
 fi
 
 cd $WD
