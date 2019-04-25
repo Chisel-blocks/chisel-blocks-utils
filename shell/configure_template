@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #############################################################################
 # This is a Chisel RTL generator configuration script file. 
 # The purpose is to control the compilation and testing
