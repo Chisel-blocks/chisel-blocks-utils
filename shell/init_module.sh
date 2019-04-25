@@ -41,7 +41,7 @@ EOF
 SCRIPTPATH=$(cd `dirname $0` && pwd )
 
 MODULE=""
-TARGETREMOTE="git@bwrcrepo.eecs.berkeley.edu:dsp-blocks/chisel/${MODULE}.git"
+TARGETREMOTE=""
 
 PUSHING="0"
 TARGETBRANCH="master"
@@ -69,10 +69,9 @@ if [ -z "$MODULE" ]; then
 fi
 
 if [ -z "$TARGETREMOTE" ]; then
+    TARGETREMOTE="git@bwrcrepo.eecs.berkeley.edu:dsp-blocks/chisel/${MODULE}.git"
     echo "Using default target remote repository "
-    "git@bwrcrepo.eecs.berkeley.edu:dsp-blocks/chisel/${MODULE}.git"
-    help_f
-    exit 1
+    echo "${TARGETREMOTE}"
 fi
 
 if [ -d "${WD}/${MODULE}" ]; then
