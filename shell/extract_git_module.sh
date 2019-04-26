@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Extract files from existing git repository and push them to master branch
 # of git@bwrcrepo.eecs.berkeley.edu:dsp-blocks/chisel/${MODULE}.git
 #
