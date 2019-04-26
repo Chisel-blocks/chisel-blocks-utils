@@ -59,6 +59,8 @@ SCALAPATH= ${SCALAPATH}
 MODULES= ${MODULES}
 
 TARGETS = \$(foreach name,\$(MODULES), \$(VERILOGPATH)/\$(name).v)
+TEST_TARGETS = \$(foreach name,\$(MODULES), test_\$(name))
+
 #Commands
 SBT=sbt -J-Xmx16G -J-Xss8M
 
@@ -69,12 +71,21 @@ done`
 .PHONY: all help clean \$(MODULES)
 
 
-all: \$(TARGETS)
+all: \$(TARGETS) \$(TEST_TARGETS)
 
-#Generate recipes for individual modules
+
+#Recipes for individual modules
 `for i in ${MODULES}; do
     echo -e "$i: \\$(VERILOGPATH)/$i.v"
 done`
+
+#Test recipes for in
+`for i in ${MODULES}; do
+	echo ".PHONY: test_$i"
+    echo "test_$i:"
+	echo -e "\t\\$(SBT) 'runMain $i.unit_test'" 
+done`
+
 
 #Template for conditional makes
 #Figure out the naming conventions later. Package is lowercase, class equals main method
