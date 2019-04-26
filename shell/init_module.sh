@@ -53,6 +53,11 @@ CURRENTDIR=$(pwd)
 
 SED="sed"
 
+#Default versions
+CHISEL="3.1.6"
+CHISEL_IOTESTERS="1.2.9"
+DSPTOOLS="1.1.8"
+
 while getopts m:PR:t:w:h opt
 do
   case "$opt" in
@@ -173,9 +178,9 @@ resolvers += "Sonatype Releases" at "https://oss.sonatype.org/content/repositori
 // Provide a managed dependency on X if -DXVersion="" is supplied on the command line.
 // [TODO] is simpler clearer?
 val defaultVersions = Map(
-  "chisel3" -> "3.2-SNAPSHOT",
-  "chisel-iotesters" -> "1.2.5",
-  "dsptools" -> "1.1.4"
+  "chisel3" -> "$CHISEL",
+  "chisel-iotesters" -> "$CHISEL_IOTESTERS",
+  "dsptools" -> "$DSPTOOLS"
   )
 
 libraryDependencies ++= (Seq("chisel3","chisel-iotesters","dsptools").map {
@@ -201,8 +206,6 @@ libraryDependencies  ++= Seq(
 )
 
 // Some common deps in BWRC projects, select if needed
-// TODO-how to figure out what version is the current and the best?
-libraryDependencies += "edu.berkeley.cs" %% "dsptools" % "1.1-SNAPSHOT"
 
 //libraryDependencies += "berkeley" %% "rocketchip" % "1.2"
 //libraryDependencies += "edu.berkeley.eecs" %% "ofdm" % "0.1"
@@ -341,6 +344,26 @@ object ${MODULE} extends App {
     chisel3.Driver.execute(args, () => new ${MODULE}(
         proto=DspComplex(UInt(16.W),UInt(16.W)), n=8)
     )
+}
+
+//This is a simple unit tester for demonstration purposes
+class unit_tester(c: ${MODULE}[DspComplex[UInt]] ) extends DspTester(c) {
+//Tests are here 
+    poke(c.io.A(0).real, 5)
+    poke(c.io.A(0).imag, 102)
+    step(5)
+    expect(c.io.B(0).real, 5)
+    expect(c.io.B(0).imag, 102)
+}
+
+//This is the test driver 
+object unit_test extends App {
+    iotesters.Driver.execute(args, () => new ${MODULE}(
+            proto=DspComplex(UInt(16.W),UInt(16.W)), n=8
+        )
+    ){
+            c=>new unit_tester(c)
+    }
 }
 EOF
 
