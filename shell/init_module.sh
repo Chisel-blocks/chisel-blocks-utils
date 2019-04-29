@@ -321,7 +321,7 @@ package ${MODULE}
 
 import chisel3.experimental._
 import chisel3._
-import dsptools._
+import dsptools.{DspTester, DspTesterOptionsManager, DspTesterOptions}
 import dsptools.numbers._
 import breeze.math.Complex
 
@@ -352,8 +352,10 @@ class unit_tester(c: ${MODULE}[DspComplex[UInt]] ) extends DspTester(c) {
     poke(c.io.A(0).real, 5)
     poke(c.io.A(0).imag, 102)
     step(5)
-    expect(c.io.B(0).real, 5)
-    expect(c.io.B(0).imag, 102)
+    fixTolLSBs.withValue(1) {
+        expect(c.io.B(0).real, 5)
+        expect(c.io.B(0).imag, 102)
+    }
 }
 
 //This is the test driver 
