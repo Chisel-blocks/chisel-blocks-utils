@@ -63,6 +63,13 @@ WD=$(pwd)
 
 CURRENTDIR=$(pwd)
 
+SED="sed"
+
+#Default versions
+CHISEL="3.1.6"
+CHISEL_IOTESTERS="1.2.9"
+DSPTOOLS="1.1.8"
+
 while getopts m:p:Pr:R:s:t:w:h opt
 do
   case "$opt" in
@@ -78,6 +85,17 @@ do
     \?) help_f; exit 0;;
   esac
 done
+
+OSNAME=$(uname)
+if [ "$OSNAME" = "Darwin" ]; then
+    SED="gsed"
+    if ! type "${SED}" &> /dev/null; then
+        echo "Please install GNU sed to run to MacOS."
+        exit 1
+    fi
+else
+    echo "Assuming that sed is GNU sed for operating system ${OSNAME}."
+fi
 
 if [ -z "$MODULE" ]; then
     echo "Module name not given"
@@ -200,9 +218,9 @@ resolvers += "Sonatype Releases" at "https://oss.sonatype.org/content/repositori
 // Provide a managed dependency on X if -DXVersion="" is supplied on the command line.
 // [TODO] is simpler clearer?
 val defaultVersions = Map(
-  "chisel3" -> "3.2-SNAPSHOT",
-  "chisel-iotesters" -> "1.2.5",
-  "dsptools" -> "1.1.4"
+  "chisel3" -> "$CHISEL",
+  "chisel-iotesters" -> "$CHISEL_IOTESTERS",
+  "dsptools" -> "$DSPTOOLS"
   )
 
 libraryDependencies ++= (Seq("chisel3","chisel-iotesters","dsptools").map {
@@ -243,7 +261,7 @@ git add ./build.sbt
 
 echo "Generating configure file template"
 cp ${SCRIPTPATH}/configure_template ./configure
-sed -i "s/TEMPLATEMODULENAME/${MODULE}/" ./configure
+${SED} -i "s/TEMPLATEMODULENAME/${MODULE}/" ./configure
 git add ./configure
 
 echo "Generating init_submodules.sh template"
