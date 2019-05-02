@@ -260,6 +260,7 @@ git submodule update --init
 #        ./init_submodules.sh
 #    fi
 #    sbt publishLocal
+#    cd \${DIR}
 #done
 
 
