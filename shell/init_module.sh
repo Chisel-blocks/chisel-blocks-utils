@@ -89,7 +89,7 @@ if [ -z "$MODULE" ]; then
 fi
 
 if [ -z "$TARGETREMOTE" ]; then
-    TARGETREMOTE="git@bwrcrepo.eecs.berkeley.edu:dsp-blocks/chisel/${MODULE}.git"
+    TARGETREMOTE="git@github.com/Chisel-blocks/${MODULE}.git"
     echo "Using default target remote repository "
     echo "${TARGETREMOTE}"
 fi
@@ -119,7 +119,7 @@ import scala.sys.process._
 // OBS: sbt._ has also process. Importing scala.sys.process
 // and explicitly using it ensures the correct operation
 
-organization := "edu.berkeley.cs"
+organization := "Chisel-blocks"
 
 name := "$MODULE"
 
