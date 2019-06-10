@@ -10,18 +10,18 @@
 ##The configuration from the commnad line
 help_f()
 {
-    echo -e "CONFIGURE Release 1.0 (04.04.2016)"
-    echo -e "configure-configuration script for Chisel RTL generation"
-    echo -e "Written by Marko "Pikkis" Kosunen"
-    echo -e -n "\n"
-    echo -e "SYNOPSIS"
-    echo -e "  configure [OPTIONS] "
-    echo -e "DESCRIPTION"
-    echo -e "  Producess all configurations and Makefile for the Chisel RTL generation"
-    echo -e -n "\n"
-    echo -e "OPTIONS"
-    echo -e "  -h"
-    echo -e "      Show this help."
+    printf "CONFIGURE Release 1.0 (04.04.2016)\n"
+    printf "configure-configuration script for Chisel RTL generation\n"
+    printf "Written by Marko "Pikkis" Kosunen\n\n"
+
+    printf "SYNOPSIS\n"
+    printf "  configure [OPTIONS]\n"
+    printf "DESCRIPTION\n"
+    printf "  Produces all configurations and Makefile for the Chisel RTL generation\n\n"
+
+    printf "OPTIONS\n"
+    printf "  -h\n"
+    printf "      Show this help.\n"
 }
 
 while getopts h opt
@@ -76,14 +76,14 @@ all: \$(TARGETS) \$(TEST_TARGETS)
 
 #Recipes for individual modules
 `for i in ${MODULES}; do
-    echo -e "$i: \\$(VERILOGPATH)/$i.v"
+    printf "%s: \\$(VERILOGPATH)/%s.v\n" $i $i
 done`
 
 #Test recipes for in
 `for i in ${MODULES}; do
-	echo ".PHONY: test_$i"
-    echo "test_$i:"
-	echo -e "\t\\$(SBT) 'runMain $i.unit_test'" 
+	printf ".PHONY: test_%s\n" $i
+	printf "test_%s:\n" $i
+	printf "\t\\$(SBT) 'runMain %s.unit_test'\n"  $i
 done`
 
 
@@ -113,13 +113,13 @@ memmap:
 
 #Generate cleanup recipes for individual modules
 `for i in ${MODULES}; do
-	echo .PHONY: clean_$i
-	echo clean_$i: 
-	echo -e "\trm -f \\$(VERILOGPATH)/$i.v"
-	echo -e "\trm -f \\$(VERILOGPATH)/$i.anno"
-	echo -e "\trm -f \\$(VERILOGPATH)/$i.fir"
-    echo -e "\trm -f \\$(VERILOGPATH)/${i}_memmapped.conf"
-    echo -e "\trm -f \\$(VERILOGPATH)/${i}_memmapped.v"
+	printf ".PHONY: clean_%s\n" $i
+	printf "clean_%s:\n" $i 
+	printf "\trm -f \\$(VERILOGPATH)/%s.v" $i
+	printf "\trm -f \\$(VERILOGPATH)/%s.anno" $i
+	printf "\trm -f \\$(VERILOGPATH)/%s.fir" $i
+	printf "\trm -f \\$(VERILOGPATH)/$%s_memmapped.conf" $i
+	printf "\trm -f \\$(VERILOGPATH)/$%s_memmapped.v" $i
 done`
 
 help:
