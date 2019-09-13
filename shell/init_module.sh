@@ -27,7 +27,7 @@ cat << EOF
    -R
        Remote git repository URL in https or in ssh format
        Default:
-       "git@bwrcrepo.eecs.berkeley.edu:dsp-blocks/chisel/[MODULE].git"
+       "git@your.domain:<your_repo>/[MODULE].git"
 
    -w
        Working directory. The module will be created as a subdirectory
