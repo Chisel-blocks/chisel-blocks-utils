@@ -52,7 +52,6 @@ else
 fi
 
 MODULE=$(sed -n "s/\(^\s*module\s*\)\(${NAME}\)\(\s*(\)/\2/p" ${INPUTCOREMODULEFILE})
-echo $MODULE
 if [ -z ${MODULE} ]; then
     echo "ERROR: Module ${NAME} not found."
     echo "You have to give correct module name"
@@ -96,11 +95,11 @@ echo "            val $NAME = $(tr '[:lower:]' '[:upper:]' <<< ${TYPE:0:1})${TYP
 done < ${TMPIOFILE}
 )
         }
-    }
+    )
     setInline("${FILENAME}",
         s"""
 $(cat ${TMPMODULEFILE} | sed 's/^/        |/g')
-        """.stripmargin)
+        """.stripMargin)
 }
 
 EOF
