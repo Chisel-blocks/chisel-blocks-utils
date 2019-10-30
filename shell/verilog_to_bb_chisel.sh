@@ -90,8 +90,21 @@ class ${MODULE} extends BlackBox() with HasBlackBoxInline {
 $( while read -r line; do
 TYPE=$(echo $line | sed -n 's/\(^input\|output\)\(.*$\)/\1/p')
 NAME=$(echo $line | sed -n 's/\(^.*\s\)\(.*$\)/\2/p')
-WIDTH=$(($(echo $line | sed -n 's/\(^.*\[\)\([0-9]*\)\(.*\)/\2/p')+1))
-echo "            val $NAME = $(tr '[:lower:]' '[:upper:]' <<< ${TYPE:0:1})${TYPE:1}(UInt(${WIDTH}.W))"
+LLIM=$(echo $line | sed -n 's/\(^.*\[\)\([0-9]*\)\(.*\)/\2/p')
+RLIM=$(echo $line | sed -n 's/\(^.*\[.*:\)\([0-9]*\)\(.*\)/\2/p')
+if [ ! -z ${LLIM} ]; then
+    if [ ${LLIM} -ge ${RLIM} ]; then
+        WIDTH=$((${LLILM}-${RLIM}+1))
+        VALTYPE="UInt"
+    else
+        WIDTH=$((${RLIM}-${LLIM}+1))
+        VALTYPE="Bits"
+    fi
+else
+    WIDTH="1"
+    VALTYPE="UInt"
+fi
+echo "            val $NAME = $(tr '[:lower:]' '[:upper:]' <<< ${TYPE:0:1})${TYPE:1}(${VALTYPE}(${WIDTH}.W))"
 done < ${TMPIOFILE}
 )
         }
