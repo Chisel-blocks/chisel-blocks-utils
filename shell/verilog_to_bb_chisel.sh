@@ -94,7 +94,7 @@ LLIM=$(echo $line | sed -n 's/\(^.*\[\)\([0-9]*\)\(.*\)/\2/p')
 RLIM=$(echo $line | sed -n 's/\(^.*\[.*:\)\([0-9]*\)\(.*\)/\2/p')
 if [ ! -z ${LLIM} ]; then
     if [ ${LLIM} -ge ${RLIM} ]; then
-        WIDTH=$((${LLILM}-${RLIM}+1))
+        WIDTH=$((${LLIM}-${RLIM}+1))
         VALTYPE="UInt"
     else
         WIDTH=$((${RLIM}-${LLIM}+1))
