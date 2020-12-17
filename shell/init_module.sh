@@ -7,7 +7,7 @@
 help_f()
 {
 cat << EOF
- init_submodule  Release 1.0 (21.18.2018)
+ init_submodule  Release 1.1 (17.12.2020)
  Initializes a self-contained dsp-block module
  with a minimum working example
  Written by Marko Pikkis Kosunen marko.kosunen@aalto.fi
@@ -54,10 +54,11 @@ CURRENTDIR=$(pwd)
 SED="sed"
 
 #Default versions
-CHISEL="3.1.6"
-CHISEL_IOTESTERS="1.2.9"
-DSPTOOLS="1.1.8"
-
+SCALA="2.12.10"
+CHISEL="3.4.0"
+CHISEL_IOTESTERS="1.5.1"
+DSPTOOLS="1.4.1"
+BREEZE="1.1"
 while getopts m:PR:t:w:h opt
 do
   case "$opt" in
@@ -125,7 +126,7 @@ name := "$MODULE"
 
 version := scala.sys.process.Process("git rev-parse --short HEAD").!!.mkString.replaceAll("\\\\s", "")+"-SNAPSHOT"
 
-scalaVersion := "2.11.11"
+scalaVersion := "$SCALA"
 
 // [TODO] what are these needed for? remove if obsolete
 def scalacOptionsVersion(scalaVersion: String): Seq[String] = {
@@ -163,7 +164,7 @@ def gitSubmoduleHashSnapshotVersion(submod: String): String = {
 
 
 // [TODO] what are these needed for? remove if obsolete
-crossScalaVersions := Seq("2.11.11", "2.12.3")
+crossScalaVersions := Seq("2.11.11", "$SCALA")
 scalacOptions ++= scalacOptionsVersion(scalaVersion.value)
 javacOptions ++= javacOptionsVersion(scalaVersion.value)
 
@@ -192,27 +193,21 @@ libraryDependencies += "com.gilt" %% "handlebars-scala" % "2.1.1"
 
 libraryDependencies  ++= Seq(
 //  // Last stable release
-  "org.scalanlp" %% "breeze" % "0.13.2",
+  "org.scalanlp" %% "breeze" % "$BREEZE",
 
 // Native libraries are not included by default. add this if you want them (as of 0.7)
   // Native libraries greatly improve performance, but increase jar sizes.
   // It also packages various blas implementations, which have licenses that may or may not
   // be compatible with the Apache License. No GPL code, as best I know.
-  "org.scalanlp" %% "breeze-natives" % "0.13.2",
+  "org.scalanlp" %% "breeze-natives" % "$BREEZE",
 
   // The visualization library is distributed separately as well.
   // It depends on LGPL code
-  "org.scalanlp" %% "breeze-viz" % "0.13.2"
+  "org.scalanlp" %% "breeze-viz" % "$BREEZE"
 )
 
-// Some common deps in BWRC projects, select if needed
-
-//libraryDependencies += "berkeley" %% "rocketchip" % "1.2"
-//libraryDependencies += "edu.berkeley.eecs" %% "ofdm" % "0.1"
-//libraryDependencies += "edu.berkeley.cs" %% "eagle_serdes" % "0.0-SNAPSHOT"
-
 // Put your git-version controlled snapshots here
-//libraryDependencies += "edu.berkeley.cs" %% "hbwif" % gitSubmoduleHashSnapshotVersion("hbwif")
+//libraryDependencies += "Chisel-blocks" %% "someblock" % gitSubmoduleHashSnapshotVersion("someblock")
 
 EOF
 git add ./build.sbt
