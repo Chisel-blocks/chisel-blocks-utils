@@ -90,7 +90,7 @@ if [ -z "$MODULE" ]; then
 fi
 
 if [ -z "$TARGETREMOTE" ]; then
-    TARGETREMOTE="git@github.com/Chisel-blocks/${MODULE}.git"
+    TARGETREMOTE="git@github.com:Chisel-blocks/${MODULE}.git"
     echo "Using default target remote repository "
     echo "${TARGETREMOTE}"
 fi
