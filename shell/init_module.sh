@@ -310,7 +310,7 @@ cat << EOF > ./src/main/scala/${MODULE}/${MODULE}.scala
 
 // Dsp-block ${MODULE}
 // Description here
-// Inititally written by dsp-blocks initmodule.sh, $(date +'%Y%m%d')
+// Inititally written by dsp-blocks initmodule.sh, $(date +'%Y-%m-%d')
 package ${MODULE}
 
 import chisel3.experimental._
@@ -319,13 +319,18 @@ import dsptools.{DspTester, DspTesterOptionsManager, DspTesterOptions}
 import dsptools.numbers._
 import breeze.math.Complex
 
+/** IO definitions for ${MODULE} */
 class ${MODULE}_io[T <:Data](proto: T,n: Int)
    extends Bundle {
         val A       = Input(Vec(n,proto))
         val B       = Output(Vec(n,proto))
         override def cloneType = (new ${MODULE}_io(proto.cloneType,n)).asInstanceOf[this.type]
-   }
+}
 
+/** Module definition for ${MODULE}
+  * @param proto type information
+  * @param n number of elements in register
+  */
 class ${MODULE}[T <:Data] (proto: T,n: Int) extends Module {
     val io = IO(new ${MODULE}_io( proto=proto, n=n))
     val register=RegInit(VecInit(Seq.fill(n)(0.U.asTypeOf(proto.cloneType))))
@@ -333,16 +338,16 @@ class ${MODULE}[T <:Data] (proto: T,n: Int) extends Module {
     io.B:=register
 }
 
-//This gives you verilog
+/** This gives you verilog */
 object ${MODULE} extends App {
     chisel3.Driver.execute(args, () => new ${MODULE}(
         proto=DspComplex(UInt(16.W),UInt(16.W)), n=8)
     )
 }
 
-//This is a simple unit tester for demonstration purposes
+/** This is a simple unit tester for demonstration purposes */
 class unit_tester(c: ${MODULE}[DspComplex[UInt]] ) extends DspTester(c) {
-//Tests are here 
+    // Tests are here 
     poke(c.io.A(0).real, 5)
     poke(c.io.A(0).imag, 102)
     step(5)
@@ -352,18 +357,28 @@ class unit_tester(c: ${MODULE}[DspComplex[UInt]] ) extends DspTester(c) {
     }
 }
 
-//This is the test driver 
+/** Unit test driver */
 object unit_test extends App {
     iotesters.Driver.execute(args, () => new ${MODULE}(
-            proto=DspComplex(UInt(16.W),UInt(16.W)), n=8
-        )
-    ){
-            c=>new unit_tester(c)
+        proto=DspComplex(UInt(16.W),UInt(16.W)), n=8
+    )) {
+        c => new unit_tester(c)
     }
 }
 EOF
-
 git add  ./src/main/scala/${MODULE}/${MODULE}.scala
+
+
+cat << EOF > ./src/main/scala/${MODULE}/package.scala
+/** This comment generates package-wide documentation using scaladoc.
+  * @see See [[https://docs.scala-lang.org/overviews/scaladoc/for-library-authors.html this page]]
+  * for more information about scaladoc comments.
+  * The comment generating this documentation can be found in the file \`src/main/scala/${MODULE}/package.scala\`.
+  */
+package object ${MODULE} {}
+EOF
+git add  ./src/main/scala/${MODULE}/package.scala
+
 git commit -m"Init git-versioned submodule ${MODULE}"
 
 if [ "$PUSH" == "1" ]; then
