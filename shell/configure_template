@@ -68,7 +68,7 @@ TOUCH=touch -r
 `for i in ${VPATHDIRS}; do
     echo vpath %.scala \\$\(SCALAPATH\)/$i
 done`
-.PHONY: all help clean \$(MODULES)
+.PHONY: all help doc clean \$(MODULES)
 
 
 all: \$(TARGETS) \$(TEST_TARGETS)
@@ -127,6 +127,10 @@ help:
 	@for i in \$(MODULES) ; do \\
 	   echo \$\$i; \\
 	done
+
+doc:
+	sbt doc
+
 EOF
 ##################Hereafter some files you should not need to modify ################################
 
