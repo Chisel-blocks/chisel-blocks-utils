@@ -58,6 +58,7 @@ SCALA="2.12.10"
 CHISEL="3.4.0"
 CHISEL_IOTESTERS="1.5.1"
 DSPTOOLS="1.4.1"
+CHISELTEST="0.3.2"
 BREEZE="1.1"
 while getopts m:PR:t:w:h opt
 do
@@ -88,6 +89,8 @@ if [ -z "$MODULE" ]; then
     help_f
     exit 1
 fi
+
+PACKAGENAME=$(echo $MODULE | awk '{print tolower($0)}')
 
 if [ -z "$TARGETREMOTE" ]; then
     TARGETREMOTE="git@github.com:Chisel-blocks/${MODULE}.git"
@@ -122,7 +125,7 @@ import scala.sys.process._
 
 organization := "Chisel-blocks"
 
-name := "$MODULE"
+name := "$PACKAGENAME"
 
 version := scala.sys.process.Process("git rev-parse --short HEAD").!!.mkString.replaceAll("\\\\s", "")+"-SNAPSHOT"
 
@@ -181,10 +184,11 @@ resolvers += "Sonatype Releases" at "https://oss.sonatype.org/content/repositori
 val defaultVersions = Map(
   "chisel3" -> "$CHISEL",
   "chisel-iotesters" -> "$CHISEL_IOTESTERS",
-  "dsptools" -> "$DSPTOOLS"
+  "dsptools" -> "$DSPTOOLS",
+  "chiseltest" -> "$CHISELTEST"
   )
 
-libraryDependencies ++= (Seq("chisel3","chisel-iotesters","dsptools").map {
+libraryDependencies ++= (Seq("chisel3","chisel-iotesters","dsptools","chiseltest").map {
   dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep)) })
 
 
@@ -212,6 +216,7 @@ git add ./build.sbt
 echo "Generating configure file template"
 cp ${SCRIPTPATH}/configure_template ./configure
 ${SED} -i "s/TEMPLATEMODULENAME/${MODULE}/" ./configure
+${SED} -i "s/TEMPLATEPACKAGENAME/${PACKAGENAME}/" ./configure
 git add ./configure
 
 echo "Generating init_submodules.sh template"
@@ -305,26 +310,27 @@ Lorem ipsum...
 EOF
 git add ./README.md
 
-mkdir -p ./src/main/scala/${MODULE}
-cat << EOF > ./src/main/scala/${MODULE}/${MODULE}.scala
+mkdir -p ./src/main/scala/${PACKAGENAME}
+cat << EOF > ./src/main/scala/${PACKAGENAME}/${MODULE}.scala
 
-// Dsp-block ${MODULE}
+// Chisel module ${MODULE}
 // Description here
-// Inititally written by dsp-blocks initmodule.sh, $(date +'%Y-%m-%d')
-package ${MODULE}
+// Inititally written by chisel-blocks-utils initmodule.sh, $(date +'%Y-%m-%d')
+package ${PACKAGENAME}
 
-import chisel3.experimental._
 import chisel3._
+import chisel3.util._
+import chisel3.experimental._
 import dsptools.{DspTester, DspTesterOptionsManager, DspTesterOptions}
 import dsptools.numbers._
 import breeze.math.Complex
 
 /** IO definitions for ${MODULE} */
-class ${MODULE}_io[T <:Data](proto: T,n: Int)
+class ${MODULE}IO[T <:Data](proto: T,n: Int)
    extends Bundle {
         val A       = Input(Vec(n,proto))
         val B       = Output(Vec(n,proto))
-        override def cloneType = (new ${MODULE}_io(proto.cloneType,n)).asInstanceOf[this.type]
+        override def cloneType = (new ${MODULE}IO(proto.cloneType,n)).asInstanceOf[this.type]
 }
 
 /** Module definition for ${MODULE}
@@ -332,7 +338,7 @@ class ${MODULE}_io[T <:Data](proto: T,n: Int)
   * @param n number of elements in register
   */
 class ${MODULE}[T <:Data] (proto: T,n: Int) extends Module {
-    val io = IO(new ${MODULE}_io( proto=proto, n=n))
+    val io = IO(new ${MODULE}IO( proto=proto, n=n))
     val register=RegInit(VecInit(Seq.fill(n)(0.U.asTypeOf(proto.cloneType))))
     register:=io.A
     io.B:=register
@@ -346,7 +352,7 @@ object ${MODULE} extends App {
 }
 
 /** This is a simple unit tester for demonstration purposes */
-class unit_tester(c: ${MODULE}[DspComplex[UInt]] ) extends DspTester(c) {
+class UnitTester(c: ${MODULE}[DspComplex[UInt]] ) extends DspTester(c) {
     // Tests are here 
     poke(c.io.A(0).real, 5)
     poke(c.io.A(0).imag, 102)
@@ -358,15 +364,15 @@ class unit_tester(c: ${MODULE}[DspComplex[UInt]] ) extends DspTester(c) {
 }
 
 /** Unit test driver */
-object unit_test extends App {
+object UnitTestDriver extends App {
     iotesters.Driver.execute(args, () => new ${MODULE}(
         proto=DspComplex(UInt(16.W),UInt(16.W)), n=8
     )) {
-        c => new unit_tester(c)
+        c => new UnitTester(c)
     }
 }
 EOF
-git add  ./src/main/scala/${MODULE}/${MODULE}.scala
+git add  ./src/main/scala/${PACKAGENAME}/${MODULE}.scala
 
 
 cat << EOF > ./src/main/scala/${MODULE}/package.scala
@@ -375,7 +381,7 @@ cat << EOF > ./src/main/scala/${MODULE}/package.scala
   * for more information about scaladoc comments.
   * The comment generating this documentation can be found in the file \`src/main/scala/${MODULE}/package.scala\`.
   */
-package object ${MODULE} {}
+package object ${PACKAGENAME} {}
 EOF
 git add  ./src/main/scala/${MODULE}/package.scala
 
