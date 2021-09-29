@@ -60,11 +60,12 @@ CHISEL_IOTESTERS="1.5.1"
 DSPTOOLS="1.4.1"
 CHISELTEST="0.3.2"
 BREEZE="1.1"
+PUSH="0"
 while getopts m:PR:t:w:h opt
 do
   case "$opt" in
     m) MODULE="${OPTARG}";;
-    P) PUSHING="1";;
+    P) PUSH="1";;
     R) TARGETREMOTE="${OPTARG}";;
     t) TARGETBRANCH="${OPTARG}";;
     w) WD="${OPTARG}";;
