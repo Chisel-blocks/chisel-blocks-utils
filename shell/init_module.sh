@@ -303,6 +303,7 @@ package ${PACKAGENAME}
 import chisel3._
 import chisel3.util._
 import chisel3.experimental._
+import chisel3.stage.{ChiselStage, ChiselGeneratorAnnotation}
 import dsptools.{DspTester, DspTesterOptionsManager, DspTesterOptions}
 import dsptools.numbers._
 import breeze.math.Complex
@@ -328,9 +329,10 @@ class ${MODULE}[T <:Data] (proto: T,n: Int) extends Module {
 
 /** This gives you verilog */
 object ${MODULE} extends App {
-    chisel3.Driver.execute(args, () => new ${MODULE}(
-        proto=DspComplex(UInt(16.W),UInt(16.W)), n=8)
-    )
+    val annos = Seq(ChiselGeneratorAnnotation(() => new ${MODULE}(
+        proto=DspComplex(UInt(16.W),UInt(16.W)), n=8
+    )))
+    (new ChiselStage).execute(args, annos)
 }
 
 /** This is a simple unit tester for demonstration purposes */
