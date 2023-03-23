@@ -54,12 +54,11 @@ CURRENTDIR=$(pwd)
 SED="sed"
 
 #Default versions
-SCALA="2.12.10"
-CHISEL="3.4.0"
-CHISEL_IOTESTERS="1.5.1"
-DSPTOOLS="1.4.1"
-CHISELTEST="0.3.2"
-BREEZE="1.1"
+SCALA="2.13.8"
+CHISEL="3.5.4"
+DSPTOOLS="1.5.6"
+CHISELTEST="0.5.4"
+BREEZE="2.0"
 PUSH="0"
 while getopts m:PR:t:w:h opt
 do
@@ -124,92 +123,48 @@ import scala.sys.process._
 // OBS: sbt._ has also process. Importing scala.sys.process
 // and explicitly using it ensures the correct operation
 
-organization := "Chisel-blocks"
+ThisBuild / scalaVersion := "$SCALA"
+ThisBuild / version      := scala.sys.process.Process("git rev-parse --short HEAD").!!.mkString.replaceAll("\\\s", "")+"-SNAPSHOT"
+ThisBuild / organization := "Chisel-blocks"
 
-name := "$PACKAGENAME"
+// Last two numbers must be the same
+val chiselVersion = "$CHISEL"
+val chiselTestVersion = "$CHISELTEST"
 
-version := scala.sys.process.Process("git rev-parse --short HEAD").!!.mkString.replaceAll("\\\\s", "")+"-SNAPSHOT"
+val breezeVersion = "$BREEZE"
+val dspVersion = "$DSPTOOLS"
 
-scalaVersion := "$SCALA"
-
-// [TODO] what are these needed for? remove if obsolete
-def scalacOptionsVersion(scalaVersion: String): Seq[String] = {
-  Seq() ++ {
-    // If we're building with Scala > 2.11, enable the compile option
-    //  switch to support our anonymous Bundle definitions:
-    //  https://github.com/scala/bug/issues/10047
-    CrossVersion.partialVersion(scalaVersion) match {
-      case Some((2, scalaMajor: Long)) if scalaMajor < 12 => Seq()
-      case _ => Seq("-Xsource:2.11")
-    }
-  }
-}
-
-def javacOptionsVersion(scalaVersion: String): Seq[String] = {
-  Seq() ++ {
-    // Scala 2.12 requires Java 8. We continue to generate
-    //  Java 7 compatible code for Scala 2.11
-    //  for compatibility with old clients.
-    CrossVersion.partialVersion(scalaVersion) match {
-      case Some((2, scalaMajor: Long)) if scalaMajor < 12 =>
-        Seq("-source", "1.7", "-target", "1.7")
-      case _ =>
-        Seq("-source", "1.8", "-target", "1.8")
-    }
-  }
-}
+lazy val root = (project in file("."))
+  .settings(
+    name := "$PACKAGENAME",
+    libraryDependencies ++= Seq(
+      "edu.berkeley.cs" %% "chisel3" % chiselVersion,
+      "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion % "test",
+      "edu.berkeley.cs" %% "dsptools" % dspVersion,
+      "org.scalanlp" %% "breeze" % breezeVersion,
+      "org.scalanlp" %% "breeze-natives" % breezeVersion,
+      "org.scalanlp" %% "breeze-viz" % breezeVersion
+    ),
+    scalacOptions ++= Seq(
+      "-language:reflectiveCalls",
+      "-deprecation",
+      "-feature",
+      "-Xcheckinit",
+      "-P:chiselplugin:genBundleElements",
+    ),
+    addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % chiselVersion cross CrossVersion.full),
+  )
 
 // Parse the version of a submodle from the git submodule status
 // for those modules not version controlled by Maven or equivalent
 def gitSubmoduleHashSnapshotVersion(submod: String): String = {
     val shellcommand =  "git submodule status | grep %s | awk '{print substr(\$1,0,7)}'".format(submod)
-    scala.sys.process.Process(Seq("/bin/sh", "-c", shellcommand )).!!.mkString.replaceAll("\\\\s", "")+"-SNAPSHOT"
+    scala.sys.process.Process(Seq("/bin/sh", "-c", shellcommand )).!!.mkString.replaceAll("\\\s", "")+"-SNAPSHOT"
 }
-
-
-// [TODO] what are these needed for? remove if obsolete
-crossScalaVersions := Seq("2.11.11", "$SCALA")
-scalacOptions ++= scalacOptionsVersion(scalaVersion.value)
-javacOptions ++= javacOptionsVersion(scalaVersion.value)
-
-// [TODO] what are these needed for? remove if obsolete
-resolvers ++= Seq(
-  Resolver.sonatypeRepo("snapshots"),
-  Resolver.sonatypeRepo("releases")
-)
-// [TODO]: Is this redundant?
-resolvers += "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
-
-// Provide a managed dependency on X if -DXVersion="" is supplied on the command line.
-// [TODO] is simpler clearer?
-val defaultVersions = Map(
-  "chisel3" -> "$CHISEL",
-  "chisel-iotesters" -> "$CHISEL_IOTESTERS",
-  "dsptools" -> "$DSPTOOLS",
-  "chiseltest" -> "$CHISELTEST"
-  )
-
-libraryDependencies ++= (Seq("chisel3","chisel-iotesters","dsptools","chiseltest").map {
-  dep: String => "edu.berkeley.cs" %% dep % sys.props.getOrElse(dep + "Version", defaultVersions(dep)) })
-
-
-libraryDependencies  ++= Seq(
-//  // Last stable release
-  "org.scalanlp" %% "breeze" % "$BREEZE",
-
-// Native libraries are not included by default. add this if you want them (as of 0.7)
-  // Native libraries greatly improve performance, but increase jar sizes.
-  // It also packages various blas implementations, which have licenses that may or may not
-  // be compatible with the Apache License. No GPL code, as best I know.
-  "org.scalanlp" %% "breeze-natives" % "$BREEZE",
-
-  // The visualization library is distributed separately as well.
-  // It depends on LGPL code
-  "org.scalanlp" %% "breeze-viz" % "$BREEZE"
-)
 
 // Put your git-version controlled snapshots here
 //libraryDependencies += "Chisel-blocks" %% "someblock" % gitSubmoduleHashSnapshotVersion("someblock")
+
 
 EOF
 git add ./build.sbt
@@ -286,6 +241,9 @@ at the top level ONLY if ALL the entire hierarchy of submodules from bottom
 module to top are git-added, git-committed and git-pushed.
 This is how submodules normally operate.
 
+## Testing
+Tests are located under \`src/test/scala/$PACKAGENAME\`. You can run them with \`make test_${PACKAGENAME}\`.
+
 ## Add your module readme here
 Lorem ipsum...
 
@@ -313,7 +271,6 @@ class ${MODULE}IO[T <:Data](proto: T,n: Int)
    extends Bundle {
         val A       = Input(Vec(n,proto))
         val B       = Output(Vec(n,proto))
-        override def cloneType = (new ${MODULE}IO(proto.cloneType,n)).asInstanceOf[this.type]
 }
 
 /** Module definition for ${MODULE}
@@ -335,28 +292,35 @@ object ${MODULE} extends App {
     (new ChiselStage).execute(args, annos)
 }
 
-/** This is a simple unit tester for demonstration purposes */
-class UnitTester(c: ${MODULE}[DspComplex[UInt]] ) extends DspTester(c) {
-    // Tests are here 
-    poke(c.io.A(0).real, 5)
-    poke(c.io.A(0).imag, 102)
-    step(5)
-    fixTolLSBs.withValue(1) {
-        expect(c.io.B(0).real, 5)
-        expect(c.io.B(0).imag, 102)
-    }
-}
+EOF
 
-/** Unit test driver */
-object UnitTestDriver extends App {
-    iotesters.Driver.execute(args, () => new ${MODULE}(
-        proto=DspComplex(UInt(16.W),UInt(16.W)), n=8
-    )) {
-        c => new UnitTester(c)
+git add  ./src/main/scala/${PACKAGENAME}/${MODULE}.scala
+
+mkdir -p ./src/test/scala/${PACKAGENAME}
+cat << EOF > ./src/test/scala/${PACKAGENAME}/${MODULE}Spec.scala
+package $PACKAGENAME
+
+import chisel3._
+import chiseltest._
+import org.scalatest.flatspec.AnyFlatSpec
+import dsptools.{DspTester, DspTesterOptionsManager, DspTesterOptions}
+import dsptools.numbers._
+
+class ${PACKAGENAME}Spec extends AnyFlatSpec with ChiselScalatestTester {
+
+  it should "propagate values in the register" in {
+    test(new ${PACKAGENAME}(proto = DspComplex(UInt(16.W), UInt(16.W)), n = 8)) { dut =>
+      dut.io.A(0).real poke 5
+      dut.io.A(0).imag poke 102 
+      dut.clock.step(1)
+      dut.io.B(0).real expect 5
+      dut.io.B(0).imag expect 102
     }
+  }
 }
 EOF
-git add  ./src/main/scala/${PACKAGENAME}/${MODULE}.scala
+
+git add  ./src/test/scala/${PACKAGENAME}/${MODULE}Spec.scala
 
 
 cat << EOF > ./src/main/scala/${MODULE}/package.scala

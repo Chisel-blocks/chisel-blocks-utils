@@ -85,7 +85,7 @@ done`
 `for i in ${MODULES}; do
 	echo ".PHONY: test_$i"
     echo "test_$i:"
-    echo -e "\t\\$(SBT) 'runMain ${PACKAGE}.UnitTestDriver'"
+    echo -e "\t\\$(SBT) 'testOnly ${PACKAGE}.${i}Spec'"
 done`
 
 
