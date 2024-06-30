@@ -57,7 +57,9 @@ SED="sed"
 SCALA="2.13.8"
 CHISEL="3.5.4"
 DSPTOOLS="1.5.6"
-CHISELTEST="0.5.4"
+CHISELTEST="0.5.6"
+SBT="1.9.9"
+
 BREEZE="2.0"
 PUSH="0"
 while getopts m:PR:t:w:h opt
@@ -139,7 +141,7 @@ lazy val root = (project in file("."))
     name := "$PACKAGENAME",
     libraryDependencies ++= Seq(
       "edu.berkeley.cs" %% "chisel3" % chiselVersion,
-      "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion % "test",
+      "edu.berkeley.cs" %% "chiseltest" % chiselTestVersion,
       "edu.berkeley.cs" %% "dsptools" % dspVersion,
       "org.scalanlp" %% "breeze" % breezeVersion,
       "org.scalanlp" %% "breeze-natives" % breezeVersion,
@@ -202,6 +204,10 @@ exit 0
 EOF
 chmod 755 ./init_submodules.sh
 git add ./init_submodules.sh
+
+
+echo "Generating project/build.properties for Scala-version<->sbt compatibility"
+mkdir ./project && echo "sbt.version=$SBT" > ./project/build.properties && git add ./project/build.properties
 
 echo "Writing README.md"
 cat << EOF > ./README.md
