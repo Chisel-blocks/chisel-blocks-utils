@@ -126,6 +126,7 @@ import scala.sys.process._
 // and explicitly using it ensures the correct operation
 
 ThisBuild / scalaVersion := "$SCALA"
+// [ToDo] Make this optional. In case of 'Release', build without 'dev' option, version is without snapshot.
 ThisBuild / version      := scala.sys.process.Process("git rev-parse --short HEAD").!!.mkString.replaceAll("\\\s", "")+"-SNAPSHOT"
 ThisBuild / organization := "Chisel-blocks"
 
@@ -159,6 +160,7 @@ lazy val root = (project in file("."))
 
 // Parse the version of a submodle from the git submodule status
 // for those modules not version controlled by Maven or equivalent
+// [ToDo] Make this optional. In case of 'Release', look for without 'dev' option, version is without snapshot.
 def gitSubmoduleHashSnapshotVersion(submod: String): String = {
     val shellcommand =  "git submodule status | grep %s | awk '{print substr(\$1,0,7)}'".format(submod)
     scala.sys.process.Process(Seq("/bin/sh", "-c", shellcommand )).!!.mkString.replaceAll("\\\s", "")+"-SNAPSHOT"
