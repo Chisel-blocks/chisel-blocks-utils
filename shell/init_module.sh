@@ -56,8 +56,8 @@ SED="sed"
 #Default versions
 SCALA="2.13.8"
 CHISEL="3.5.4"
+CHISELTEST="0.5.4"
 DSPTOOLS="1.5.6"
-CHISELTEST="0.5.6"
 SBT="1.9.9"
 
 BREEZE="2.0"
