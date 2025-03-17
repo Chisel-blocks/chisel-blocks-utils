@@ -312,10 +312,10 @@ import org.scalatest.flatspec.AnyFlatSpec
 import dsptools.{DspTester, DspTesterOptionsManager, DspTesterOptions}
 import dsptools.numbers._
 
-class ${PACKAGENAME}Spec extends AnyFlatSpec with ChiselScalatestTester {
+class ${MODULE}Spec extends AnyFlatSpec with ChiselScalatestTester {
 
   it should "propagate values in the register" in {
-    test(new ${PACKAGENAME}(proto = DspComplex(UInt(16.W), UInt(16.W)), n = 8)) { dut =>
+    test(new ${MODULE}(proto = DspComplex(UInt(16.W), UInt(16.W)), n = 8)) { dut =>
       dut.io.A(0).real poke 5
       dut.io.A(0).imag poke 102 
       dut.clock.step(1)
