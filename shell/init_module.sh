@@ -329,15 +329,15 @@ EOF
 git add  ./src/test/scala/${PACKAGENAME}/${MODULE}Spec.scala
 
 
-cat << EOF > ./src/main/scala/${MODULE}/package.scala
+cat << EOF > ./src/main/scala/${PACKAGENAME}/package.scala
 /** This comment generates package-wide documentation using scaladoc.
   * @see See [[https://docs.scala-lang.org/overviews/scaladoc/for-library-authors.html this page]]
   * for more information about scaladoc comments.
-  * The comment generating this documentation can be found in the file \`src/main/scala/${MODULE}/package.scala\`.
+  * The comment generating this documentation can be found in the file \`src/main/scala/${PACKAGENAME}/package.scala\`.
   */
 package object ${PACKAGENAME} {}
 EOF
-git add  ./src/main/scala/${MODULE}/package.scala
+git add  ./src/main/scala/${PACKAGENAME}/package.scala
 
 git commit -m"Init git-versioned submodule ${MODULE}"
 
